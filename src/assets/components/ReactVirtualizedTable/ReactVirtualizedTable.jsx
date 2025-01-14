@@ -48,10 +48,12 @@ export default function ReactVirtualizedTable({ loading, setLoading }) {
 
     return (
       <React.Fragment>
-        <TableCell>
+        <TableCell sx={{ padding: 0 }}>
           {/* Чекбокс для управления Completed */}
           <Checkbox checked={row.Completed} onChange={handleCheckboxChange} />
-          {row.Note} {/* Текст заметки */}
+          <span style={{ textDecoration: row.Completed ? "line-through" : "none", color: "#4a9ac0" }}>
+            {row.Note} {/* Текст заметки */}
+          </span>
         </TableCell>
       </React.Fragment>
     );

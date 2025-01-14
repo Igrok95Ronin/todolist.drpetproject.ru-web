@@ -4,6 +4,8 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import axios from "axios";
 
+import "./BasicTextFields.scss";
+
 export default function BasicTextFields({ setLoading }) {
   // Состояние для хранения значения из поля ввода
   const [note, setNote] = React.useState("");
@@ -42,10 +44,10 @@ export default function BasicTextFields({ setLoading }) {
     >
       <TextField
         fullWidth
-        label="what needs to be done?"
         id="fullWidth"
         value={note}
         onChange={(e) => setNote(e.target.value)}
+        className="basicTextFields__input"
       />
       <Button sx={{ backgroundColor: "#499cc1" }} variant="contained" type="submit">
         +
