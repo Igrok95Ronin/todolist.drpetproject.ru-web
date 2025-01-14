@@ -4,7 +4,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import axios from "axios";
 
-export default function BasicTextFields() {
+export default function BasicTextFields({ setLoading }) {
   // Состояние для хранения значения из поля ввода
   const [note, setNote] = React.useState("");
 
@@ -16,16 +16,19 @@ export default function BasicTextFields() {
     };
 
     try {
+      setLoading(true);
       await axios.post("http://localhost:8080/addpost", payload, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-      alert("Данные успешно отправлены!");
-      setNote('')
+      //   alert("Данные успешно отправлены!");
+      setNote("");
     } catch (error) {
       console.error("Ошибка при отправке данных:", error);
       alert("Произошла ошибка при отправке данных.");
+    } finally {
+      setLoading(false);
     }
   };
 
