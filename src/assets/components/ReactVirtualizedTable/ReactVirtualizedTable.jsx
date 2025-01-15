@@ -36,10 +36,12 @@ function fixedHeaderContent() {
 }
 
 // Основной компонент таблицы
-export default function ReactVirtualizedTable({ loading, setLoading }) {
+export default function ReactVirtualizedTable({ loading, setLoading, setCount }) {
   const [notes, setNotes] = React.useState([]); // Состояние для списка заметок
   const [error, setError] = React.useState(null); // Состояние для ошибок
   const [currentEdit, setCurrentEdit] = React.useState({ id: null, value: "" });
+
+
 
   const handleCheckboxChange = async (id, currentValue) => {
     const updatedCompleted = !currentValue; // Переключаем значение Completed
@@ -155,6 +157,7 @@ export default function ReactVirtualizedTable({ loading, setLoading }) {
         const notesWithEditing = response.data.map((note) => ({ ...note, isEditing: false })); // Добавляем поле isEditing
         setNotes(notesWithEditing); // Устанавливаем данные в состояние
         setLoading(false); // Отключаем индикатор загрузки
+        setCount(response.data.length)
       } catch (err) {
         console.error("Ошибка при получении данных:", err); // Логируем ошибку
         setError("Ошибка при загрузке заметок"); // Устанавливаем сообщение об ошибке
@@ -166,7 +169,7 @@ export default function ReactVirtualizedTable({ loading, setLoading }) {
   }, [loading]);
 
   return (
-    <Paper style={{ height: 520, width: "100%", marginTop: "20px" }}>
+    <Paper style={{ height: 510, width: "100%", marginTop: "20px", marginBottom: "20px" }}>
       {loading && <div>Загрузка...</div>}
       {error && <div style={{ color: "red" }}>{error}</div>}
       {!loading && !error && (
