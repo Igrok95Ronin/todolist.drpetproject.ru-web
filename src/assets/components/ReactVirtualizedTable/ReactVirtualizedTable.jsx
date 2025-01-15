@@ -12,6 +12,8 @@ import axios from "axios";
 
 import { MarkCompletedEntry } from "../MarkCompletedEntry/MarkCompletedEntry";
 
+import "./ReactVirtualizedTable.scss";
+
 // Компоненты для кастомной таблицы Virtuoso
 const VirtuosoTableComponents = {
   Scroller: React.forwardRef((props, ref) => <TableContainer component={Paper} {...props} ref={ref} />),
@@ -82,6 +84,7 @@ export default function ReactVirtualizedTable({ loading, setLoading }) {
       {error && <div style={{ color: "red" }}>{error}</div>} {/* Показ сообщения об ошибке */}
       {!loading && !error && (
         <TableVirtuoso
+          className="container"
           data={notes} // Передаём данные заметок в таблицу
           components={VirtuosoTableComponents} // Кастомные компоненты таблицы
           fixedHeaderContent={fixedHeaderContent} // Фиксированный заголовок
