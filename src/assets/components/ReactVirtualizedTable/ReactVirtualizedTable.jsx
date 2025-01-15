@@ -9,8 +9,13 @@ import Paper from "@mui/material/Paper";
 import Checkbox from "@mui/material/Checkbox";
 import { TableVirtuoso } from "react-virtuoso";
 import axios from "axios";
+import Button from "@mui/material/Button";
+import ClearIcon from "@mui/icons-material/Clear";
+import EditIcon from "@mui/icons-material/Edit";
 
 import { MarkCompletedEntry } from "../MarkCompletedEntry/MarkCompletedEntry";
+import { DeleteEntry } from "../DeleteEntry/DeleteEntry";
+import { EditEntry } from "../EditEntry/EditEntry";
 
 import "./ReactVirtualizedTable.scss";
 
@@ -34,41 +39,101 @@ function fixedHeaderContent() {
 export default function ReactVirtualizedTable({ loading, setLoading }) {
   const [notes, setNotes] = React.useState([]); // Состояние для списка заметок
   const [error, setError] = React.useState(null); // Состояние для ошибок
+  const [currentEdit, setCurrentEdit] = React.useState({ id: null, value: "" });
 
-  // Генерация содержимого строк
-  function rowContent(_index, row) {
-    // Обработчик изменения состояния чекбокса
-    const handleCheckboxChange = async () => {
-      const updatedCompleted = !row.Completed; // Переключаем значение Completed
+  const handleCheckboxChange = async (id, currentValue) => {
+    const updatedCompleted = !currentValue; // Переключаем значение Completed
+    await MarkCompletedEntry(id, updatedCompleted); // Отправляем запрос на сервер
+    setNotes((prevNotes) =>
+      prevNotes.map((note) => (note.ID === id ? { ...note, Completed: updatedCompleted } : note))
+    );
+  };
 
-      // Отправляем запрос на сервер для обновления
-      await MarkCompletedEntry(row.ID, updatedCompleted);
+  const handlerDeleteEntry = async (id) => {
+    await DeleteEntry(id, setLoading); // Удаляем запись
+  };
 
-      // Обновляем локальное состояние с новым значением Completed
-      setNotes((prevNotes) =>
-        prevNotes.map((note) => (note.ID === row.ID ? { ...note, Completed: updatedCompleted } : note))
-      );
+  const handleEditChange = (id, newValue) => {
+    setNotes((prevNotes) =>
+      prevNotes.map((note) => (note.ID === id ? { ...note, Note: newValue, isEditing: false } : note))
+    );
+  };
+
+  const rowContent = (_index, row) => {
+    const isEditing = currentEdit.id === row.ID;
+
+    const handleInputChange = (e) => {
+      setCurrentEdit((prev) => ({ ...prev, value: e.target.value })); // Обновляем только локальное состояние
+    };
+
+    const handleInputBlur = async () => {
+      if (currentEdit.value.trim() !== "") {
+        await EditEntry(row.ID, currentEdit.value, setLoading); // Обновляем запись
+
+        handleEditChange(row.ID, currentEdit.value); // Сохраняем изменения
+      }
+      setCurrentEdit({ id: null, value: "" }); // Сбрасываем локальное состояние
+    };
+
+    const handleEditClick = () => {
+      setCurrentEdit({ id: row.ID, value: row.Note }); // Включаем режим редактирования
     };
 
     return (
       <React.Fragment>
-        <TableCell sx={{ padding: 0 }}>
-          {/* Чекбокс для управления Completed */}
-          <Checkbox checked={row.Completed} onChange={handleCheckboxChange} />
-          <span style={{ textDecoration: row.Completed ? "line-through" : "none", color: "#4a9ac0" }}>
-            {row.Note} {/* Текст заметки */}
-          </span>
+        <TableCell sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: 0 }}>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {/* Чекбокс */}
+            <Checkbox
+              checked={row.Completed}
+              onChange={() => handleCheckboxChange(row.ID, row.Completed)}
+              sx={{ marginRight: "10px" }}
+            />
+            {/* Инпут или текст */}
+            {isEditing ? (
+              <input
+                type="text"
+                value={currentEdit.value}
+                onChange={handleInputChange}
+                onBlur={handleInputBlur}
+                autoFocus
+                style={{ border: "1px solid #ccc", borderRadius: "4px", padding: "4px" }}
+              />
+            ) : (
+              <span style={{ textDecoration: row.Completed ? "line-through" : "none", color: "#4a9ac0" }}>
+                {row.Note}
+              </span>
+            )}
+          </div>
+
+          <div>
+            {/* Кнопка Редактирования */}
+            {!isEditing && (
+              <Button sx={{ minWidth: "30px", padding: 0 }} variant="text" type="button" onClick={handleEditClick}>
+                <EditIcon sx={{ fontSize: "1.2em" }} />
+              </Button>
+            )}
+            {/* Кнопка Удалить */}
+            <Button
+              sx={{ minWidth: "30px", padding: 0 }}
+              variant="text"
+              type="button"
+              onClick={() => handlerDeleteEntry(row.ID)}
+            >
+              <ClearIcon sx={{ fontSize: "1.3em" }} />
+            </Button>
+          </div>
         </TableCell>
       </React.Fragment>
     );
-  }
+  };
 
-  // Эффект для получения данных при загрузке компонента
   React.useEffect(() => {
     const fetchNotes = async () => {
       try {
         const response = await axios.get(`${APIURL}`); // Получаем список заметок с сервера
-        setNotes(response.data); // Устанавливаем данные в состояние
+        const notesWithEditing = response.data.map((note) => ({ ...note, isEditing: false })); // Добавляем поле isEditing
+        setNotes(notesWithEditing); // Устанавливаем данные в состояние
         setLoading(false); // Отключаем индикатор загрузки
       } catch (err) {
         console.error("Ошибка при получении данных:", err); // Логируем ошибку
@@ -78,19 +143,19 @@ export default function ReactVirtualizedTable({ loading, setLoading }) {
     };
 
     fetchNotes(); // Вызываем функцию загрузки заметок
-  }, [loading]); // Зависимость от состояния загрузки
+  }, [loading]);
 
   return (
     <Paper style={{ height: 300, width: "100%", marginTop: "20px" }}>
-      {loading && <div>Загрузка...</div>} {/* Показ индикатора загрузки */}
-      {error && <div style={{ color: "red" }}>{error}</div>} {/* Показ сообщения об ошибке */}
+      {loading && <div>Загрузка...</div>}
+      {error && <div style={{ color: "red" }}>{error}</div>}
       {!loading && !error && (
         <TableVirtuoso
           className="container"
-          data={notes} // Передаём данные заметок в таблицу
-          components={VirtuosoTableComponents} // Кастомные компоненты таблицы
-          fixedHeaderContent={fixedHeaderContent} // Фиксированный заголовок
-          itemContent={rowContent} // Генерация строк таблицы
+          data={notes}
+          components={VirtuosoTableComponents}
+          fixedHeaderContent={fixedHeaderContent}
+          itemContent={rowContent}
         />
       )}
     </Paper>
