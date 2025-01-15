@@ -63,15 +63,33 @@ export default function ReactVirtualizedTable({ loading, setLoading }) {
     const isEditing = currentEdit.id === row.ID;
 
     const handleInputChange = (e) => {
+      const inputValue = e.target.value;
+
+      // Проверяем длину строки
+      if (inputValue.length > 100) {
+        setError("Максимум 100 символов");
+        setTimeout(() => {
+          setError("");
+        }, 2000);
+      } else {
+        setError(""); // Сбрасываем ошибку
+      }
+
       setCurrentEdit((prev) => ({ ...prev, value: e.target.value })); // Обновляем только локальное состояние
     };
 
     const handleInputBlur = async () => {
-      if (currentEdit.value.trim() !== "") {
-        await EditEntry(row.ID, currentEdit.value, setLoading); // Обновляем запись
-
-        handleEditChange(row.ID, currentEdit.value); // Сохраняем изменения
+      // Проверяем минимальное количество символов
+      if (currentEdit.value.trim().length < 3) {
+        setError("Минимум 3 символа");
+        setTimeout(() => {
+          setError("");
+        }, 2000);
+        return;
       }
+      await EditEntry(row.ID, currentEdit.value, setLoading); // Обновляем запись
+
+      handleEditChange(row.ID, currentEdit.value); // Сохраняем изменения
       setCurrentEdit({ id: null, value: "" }); // Сбрасываем локальное состояние
     };
 
@@ -82,7 +100,7 @@ export default function ReactVirtualizedTable({ loading, setLoading }) {
     return (
       <React.Fragment>
         <TableCell sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: 0 }}>
-          <div style={{ display: "flex", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
             {/* Чекбокс */}
             <Checkbox
               checked={row.Completed}
@@ -91,14 +109,16 @@ export default function ReactVirtualizedTable({ loading, setLoading }) {
             />
             {/* Инпут или текст */}
             {isEditing ? (
-              <input
-                type="text"
-                value={currentEdit.value}
-                onChange={handleInputChange}
-                onBlur={handleInputBlur}
-                autoFocus
-                style={{ border: "1px solid #ccc", borderRadius: "4px", padding: "4px" }}
-              />
+              <>
+                <input
+                  type="text"
+                  value={currentEdit.value}
+                  onChange={handleInputChange}
+                  onBlur={handleInputBlur}
+                  autoFocus
+                  style={{ border: "1px solid #ccc", borderRadius: "4px", padding: "4px", width: "100%" }}
+                />
+              </>
             ) : (
               <span style={{ textDecoration: row.Completed ? "line-through" : "none", color: "#4a9ac0" }}>
                 {row.Note}
@@ -106,7 +126,7 @@ export default function ReactVirtualizedTable({ loading, setLoading }) {
             )}
           </div>
 
-          <div>
+          <div style={{ whiteSpace: "nowrap" }}>
             {/* Кнопка Редактирования */}
             {!isEditing && (
               <Button sx={{ minWidth: "30px", padding: 0 }} variant="text" type="button" onClick={handleEditClick}>
@@ -146,7 +166,7 @@ export default function ReactVirtualizedTable({ loading, setLoading }) {
   }, [loading]);
 
   return (
-    <Paper style={{ height: 300, width: "100%", marginTop: "20px" }}>
+    <Paper style={{ height: 520, width: "100%", marginTop: "20px" }}>
       {loading && <div>Загрузка...</div>}
       {error && <div style={{ color: "red" }}>{error}</div>}
       {!loading && !error && (
