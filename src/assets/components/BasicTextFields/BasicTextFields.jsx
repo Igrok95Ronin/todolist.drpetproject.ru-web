@@ -6,6 +6,9 @@ import axios from "axios";
 
 import "./BasicTextFields.scss";
 
+const APIURL = import.meta.env.VITE_APIURL;
+
+
 export default function BasicTextFields({ setLoading }) {
   // Состояние для хранения значения из поля ввода
   const [note, setNote] = React.useState("");
@@ -19,7 +22,7 @@ export default function BasicTextFields({ setLoading }) {
 
     try {
       setLoading(true);
-      await axios.post("http://localhost:8080/addpost", payload, {
+      await axios.post(`${APIURL}/addpost`, payload, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -49,7 +52,7 @@ export default function BasicTextFields({ setLoading }) {
         onChange={(e) => setNote(e.target.value)}
         className="basicTextFields__input"
       />
-      <Button sx={{ backgroundColor: "#499cc1" }} variant="contained" type="submit">
+      <Button sx={{ backgroundColor: "#499cc1", minWidth: "50px" }} variant="contained" type="submit">
         +
       </Button>
     </Box>

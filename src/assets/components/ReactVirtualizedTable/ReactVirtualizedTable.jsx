@@ -14,6 +14,8 @@ import { MarkCompletedEntry } from "../MarkCompletedEntry/MarkCompletedEntry";
 
 import "./ReactVirtualizedTable.scss";
 
+const APIURL = import.meta.env.VITE_APIURL;
+
 // Компоненты для кастомной таблицы Virtuoso
 const VirtuosoTableComponents = {
   Scroller: React.forwardRef((props, ref) => <TableContainer component={Paper} {...props} ref={ref} />),
@@ -65,7 +67,7 @@ export default function ReactVirtualizedTable({ loading, setLoading }) {
   React.useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response = await axios.get("http://localhost:8080"); // Получаем список заметок с сервера
+        const response = await axios.get(`${APIURL}`); // Получаем список заметок с сервера
         setNotes(response.data); // Устанавливаем данные в состояние
         setLoading(false); // Отключаем индикатор загрузки
       } catch (err) {

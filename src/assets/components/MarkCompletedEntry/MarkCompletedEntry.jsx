@@ -1,11 +1,13 @@
 import axios from "axios"; // Импорт axios для выполнения HTTP-запросов
 
+const APIURL = import.meta.env.VITE_APIURL;
+
 // Функция для отправки PUT-запроса на сервер для обновления состояния Completed
 export async function MarkCompletedEntry(id, completed) {
   try {
     // Отправка PUT-запроса с использованием axios
     const response = await axios.put(
-      `http://localhost:8080/markcompletedentry/${id}`, // URL запроса с динамическим ID
+      `${APIURL}/markcompletedentry/${id}`, // URL запроса с динамическим ID
       {
         check: completed, // Тело запроса: новое значение поля Completed
       },
