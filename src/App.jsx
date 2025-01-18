@@ -1,7 +1,7 @@
 import * as React from "react";
-import BasicTextFields from "./assets/components/BasicTextFields/BasicTextFields";
-import ReactVirtualizedTable from "./assets/components/ReactVirtualizedTable/ReactVirtualizedTable";
-import BasicButtonGroup from "./assets/components/BasicButtonGroup/BasicButtonGroup";
+import BasicTextFields from "./components/BasicTextFields/BasicTextFields";
+import ReactVirtualizedTable from "./components/ReactVirtualizedTable/ReactVirtualizedTable";
+import BasicButtonGroup from "./components/BasicButtonGroup/BasicButtonGroup";
 
 import "./App.scss";
 
